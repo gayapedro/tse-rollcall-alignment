@@ -1,0 +1,21 @@
+# Ambiente Python
+.venv/
+__pycache__/
+*.pyc
+
+# Caches de dados brutos (regenerados pelos scripts via API da Câmara / download do TSE)
+cache_camara/
+cache_tse/
+
+# Logs e arquivos temporários
+*.log
+contested_ids.json
+
+# Ferramentas e editor
+.claude/
+.code-review-graph/
+.ipynb_checkpoints/
+
+# Materiais da disciplina (slides/PDFs) — não fazem parte do projeto.
+# Continuam no disco; apenas não vão para o git. A especificação é mantida.
+*.pdf
