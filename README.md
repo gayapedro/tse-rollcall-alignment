@@ -75,11 +75,19 @@ exportar_csvs.py     # 3. exporta tse.csv / camara.csv / dataset.csv
 tse.csv              # dado original do TSE
 camara.csv           # dado coletado da API da Câmara
 dataset.csv          # base final integrada (entrada do pré-processamento)
+notebook.ipynb       # pré-processamento + modelagem + validação (executável)
 PREPROCESSAMENTO.md  # documentação da etapa de pré-processamento
+MODELAGEM.md         # documentação da etapa de modelagem
+VALIDACAO.md         # documentação da etapa de validação
 ```
 
-## Próxima etapa
+## Etapas seguintes
 
-A partir de `dataset.csv`, o fluxo segue para o
-**[Pré-processamento](PREPROCESSAMENTO.md)** — limpeza, exploração, transformação e
-normalização dos dados (ver também o notebook `notebook.ipynb`).
+A partir de `dataset.csv`, o fluxo segue no `notebook.ipynb`:
+
+- **[Pré-processamento](PREPROCESSAMENTO.md)** — limpeza, exploração, transformação e
+  normalização dos dados (seções 1–3 do notebook).
+- **[Modelagem](MODELAGEM.md)** — múltiplos algoritmos de classificação comparados por
+  acurácia/F1 para escolher o melhor (seção 4 do notebook).
+- **[Validação](VALIDACAO.md)** — validação cruzada estratificada repetida, matriz de
+  confusão e análise de erros do modelo escolhido (seção 5 do notebook).
