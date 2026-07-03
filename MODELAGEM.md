@@ -57,33 +57,60 @@ F1-macro:
 | KNN | 0,811 | 0,738 | `n_neighbors=15`, `weights=uniform` |
 | Baseline (majoritária) | 0,736 | 0,424 | — |
 
-**Modelo escolhido: Árvore de Decisão** — melhor F1-macro e melhor acurácia,
-e ainda o modelo mais interpretável da comparação.
+**Melhor sem seleção de atributos: Árvore de Decisão** — melhor F1-macro e melhor
+acurácia, e ainda o modelo mais interpretável da comparação. A §3.1 testa se a
+seleção de atributos muda o quadro.
+
+### 3.1 Seleção de atributos (SelectKBest)
+
+O fraco desempenho do KNN sugere que 125 colunas esparsas atrapalham modelos
+sensíveis à dimensionalidade. Teste: `SelectKBest(f_classif)` **dentro do
+pipeline** (refitado por partição — sem vazamento), com `k ∈ {10, 20, 40, todas}`
+somado à grade de cada algoritmo:
+
+| Modelo | F1 sem seleção | F1 com seleção | k escolhido |
+|---|---|---|---|
+| **MLP** | 0,774 | **0,853** | **20** |
+| KNN | 0,738 | 0,771 | 40 |
+| Árvore de Decisão | 0,805 | 0,805 | todas |
+| Random Forest | 0,757 | 0,757 | todas |
+
+- **MLP dispara**: com 20 entradas em vez de 125, a razão amostras/parâmetros
+  melhora e a rede passa a árvore (0,853 no holdout, acurácia 0,892).
+- **KNN melhora** (+0,033) — confirma a hipótese da dimensionalidade.
+- **Árvore e RF escolhem `k=all`**: árvores já fazem seleção implícita por split;
+  pré-filtrar não acrescenta.
+- As 20 colunas mantidas: partidos e federações dominam, com região/UF e ocupações
+  ligadas à segurança pública e ao agro na sequência — coerente com a exploração
+  dos dados.
+
+**Modelo escolhido: MLP (`hidden=(32,)`, `alpha=0.01`) + `SelectKBest(k=20)`.**
+A árvore permanece como a leitura interpretável do problema (mostra *onde* o sinal
+está); o MLP sobre os 20 melhores atributos é quem melhor o explora.
 
 ## 4. Leitura dos resultados
 
 - **Todos os modelos superam o baseline com folga** no F1-macro
-  (0,74–0,81 contra 0,42): o perfil TSE pré-eleição carrega, sim, sinal
+  (0,74–0,85 contra 0,42): o perfil TSE pré-eleição carrega, sim, sinal
   sobre a linha de atuação futura. A pergunta do trabalho tem resposta
   positiva.
-- **A árvore vencedora tem profundidade 3**: pouquíssimas regras capturam
-  quase todo o sinal. A raiz da árvore é `partido_PL` (candidato do PL →
-  oposição em todas as folhas daquele ramo); nos demais partidos, região e
-  idade refinam a decisão. **O partido domina a previsão**, com atributos
-  demográficos em papel secundário.
+- **A árvore de profundidade 3 mostra onde o sinal está**: a raiz é
+  `partido_PL` (candidato do PL → oposição em todas as folhas daquele
+  ramo); nos demais partidos, região e idade refinam a decisão.
+  **O partido domina a previsão**, com atributos demográficos em papel
+  secundário.
 - **Random Forest fica atrás da árvore única** — contraintuitivo, mas
   coerente: o *ensemble* serve para reduzir variância, e uma árvore rasa e
   regularizada já tem variância baixa; o sorteio de atributos da floresta
   ainda dilui o sinal, que está concentrado em poucas colunas de partido.
-- **MLP não compensa a complexidade**: com apenas 442 amostras de treino,
-  a rede não encontra estrutura não-linear que a árvore simples já não
-  capture.
-- **KNN é o mais fraco** em F1: distâncias em espaço esparso de one-hot
-  (125 dimensões, maioria zeros) discriminam mal os vizinhos.
+- **Sem seleção, MLP e KNN sofrem com as 125 dimensões**; com
+  `SelectKBest(k=20)`, o MLP compacto vira o melhor modelo da comparação
+  (holdout 0,853) — a seleção de atributos é o que destrava os modelos
+  sensíveis à dimensionalidade.
 
 ## 5. Próxima etapa
 
-Validação do modelo escolhido: validação cruzada estratificada repetida
-(estimativa robusta de desempenho, não um único holdout), matriz de
-confusão e análise de erros por classe. Documentada em
+Validação do modelo escolhido (MLP + SelectKBest): validação cruzada
+estratificada repetida (estimativa robusta de desempenho, não um único
+holdout), matriz de confusão e análise de erros por classe. Documentada em
 [VALIDACAO.md](VALIDACAO.md) e na seção 5 do notebook.
