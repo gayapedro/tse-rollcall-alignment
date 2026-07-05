@@ -35,27 +35,37 @@ pré-eleição. O código executável está na **seção 4 do `notebook.ipynb`**
 
 Quatro algoritmos, cada um com uma grade leve de hiperparâmetros:
 
-| Algoritmo | Grade | Por que este algoritmo |
-|---|---|---|
-| KNN | `n_neighbors ∈ {3, 5, 9, 15, 21}`, `weights ∈ {uniform, distance}` | Método baseado em distância; depende diretamente da normalização feita no pré-processamento. |
-| Árvore de Decisão | `max_depth ∈ {3, 5, 8, None}`, `min_samples_leaf ∈ {1, 5, 10}`, `class_weight=balanced` | Interpretável: as regras aprendidas podem ser lidas e discutidas. |
-| Random Forest | `n_estimators ∈ {100, 300}`, `max_depth ∈ {8, None}`, `min_samples_leaf ∈ {1, 5}`, `class_weight=balanced` | *Ensemble* de árvores — testa se reduzir a variância da árvore única via *bagging* melhora a generalização. |
-| MLP | `hidden_layer_sizes ∈ {(32,), (64,), (32,16)}`, `alpha ∈ {10⁻³, 10⁻²}`, `max_iter=2000` | Contraste não-linear; com 590 amostras, redes pequenas e regularizadas. |
+| Algoritmo         | Grade                                                                                                      | Por que este algoritmo                                                                                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| KNN               | `n_neighbors ∈ {3, 5, 9, 15, 21}`, `weights ∈ {uniform, distance}`                                         | Método baseado em distância; depende diretamente da normalização feita no pré-processamento.                |
+| Árvore de Decisão | `max_depth ∈ {3, 5, 8, None}`, `min_samples_leaf ∈ {1, 5, 10}`, `class_weight=balanced`                    | Interpretável: as regras aprendidas podem ser lidas e discutidas.                                           |
+| Random Forest     | `n_estimators ∈ {100, 300}`, `max_depth ∈ {8, None}`, `min_samples_leaf ∈ {1, 5}`, `class_weight=balanced` | _Ensemble_ de árvores — testa se reduzir a variância da árvore única via _bagging_ melhora a generalização. |
+| MLP               | `hidden_layer_sizes ∈ {(32,), (64,), (32,16)}`, `alpha ∈ {10⁻³, 10⁻²}`, `max_iter=2000`                    | Contraste não-linear; com 590 amostras, redes pequenas e regularizadas.                                     |
 
 A busca em grade otimiza `f1_macro` na validação cruzada interna.
+
+**Por que não outros algoritmos?** _Naive Bayes_ assume independência
+condicional entre as features — suposição flagrantemente violada pelo One-Hot
+(colunas de um mesmo atributo são mutuamente exclusivas, e
+`partido`/`federacao`/`regiao` são fortemente correlacionadas entre si). _SVM_
+e _Regressão Logística_ aprendem fronteiras (lineares ou kernelizadas) sobre o
+mesmo espaço em que o MLP já atua como representante regularizado das
+fronteiras não-lineares — incluí-los multiplicaria o custo da busca sem
+adicionar uma família de hipóteses nova à comparação, que já cobre distância
+(KNN), regras (árvore), _ensemble_ (RF) e rede neural (MLP).
 
 ## 3. Resultados
 
 Desempenho no conjunto de teste (148 deputados nunca vistos), ordenado por
 F1-macro:
 
-| Modelo | Acurácia | F1-macro | Melhores hiperparâmetros |
-|---|---|---|---|
-| **Árvore de Decisão** | **0,851** | **0,805** | `max_depth=3`, `min_samples_leaf=5` |
-| MLP | 0,824 | 0,774 | `hidden_layer_sizes=(32,)`, `alpha=0.01` |
-| Random Forest | 0,804 | 0,757 | `n_estimators=100`, `max_depth=8`, `min_samples_leaf=5` |
-| KNN | 0,811 | 0,738 | `n_neighbors=15`, `weights=uniform` |
-| Baseline (majoritária) | 0,736 | 0,424 | — |
+| Modelo                 | Acurácia  | F1-macro  | Melhores hiperparâmetros                                |
+| ---------------------- | --------- | --------- | ------------------------------------------------------- |
+| **Árvore de Decisão**  | **0,851** | **0,805** | `max_depth=3`, `min_samples_leaf=5`                     |
+| MLP                    | 0,824     | 0,774     | `hidden_layer_sizes=(32,)`, `alpha=0.01`                |
+| Random Forest          | 0,804     | 0,757     | `n_estimators=100`, `max_depth=8`, `min_samples_leaf=5` |
+| KNN                    | 0,811     | 0,738     | `n_neighbors=15`, `weights=uniform`                     |
+| Baseline (majoritária) | 0,736     | 0,424     | —                                                       |
 
 **Melhor sem seleção de atributos: Árvore de Decisão** — melhor F1-macro e melhor
 acurácia, e ainda o modelo mais interpretável da comparação. A §3.1 testa se a
@@ -68,12 +78,12 @@ sensíveis à dimensionalidade. Teste: `SelectKBest(f_classif)` **dentro do
 pipeline** (refitado por partição — sem vazamento), com `k ∈ {10, 20, 40, todas}`
 somado à grade de cada algoritmo:
 
-| Modelo | F1 sem seleção | F1 com seleção | k escolhido |
-|---|---|---|---|
-| **MLP** | 0,774 | **0,853** | **20** |
-| KNN | 0,738 | 0,771 | 40 |
-| Árvore de Decisão | 0,805 | 0,805 | todas |
-| Random Forest | 0,757 | 0,757 | todas |
+| Modelo            | F1 sem seleção | F1 com seleção | k escolhido |
+| ----------------- | -------------- | -------------- | ----------- |
+| **MLP**           | 0,774          | **0,853**      | **20**      |
+| KNN               | 0,738          | 0,771          | 40          |
+| Árvore de Decisão | 0,805          | 0,805          | todas       |
+| Random Forest     | 0,757          | 0,757          | todas       |
 
 - **MLP dispara**: com 20 entradas em vez de 125, a razão amostras/parâmetros
   melhora e a rede passa a árvore (0,853 no holdout, acurácia 0,892).
@@ -85,7 +95,7 @@ somado à grade de cada algoritmo:
   dos dados.
 
 **Modelo escolhido: MLP (`hidden=(32,)`, `alpha=0.01`) + `SelectKBest(k=20)`.**
-A árvore permanece como a leitura interpretável do problema (mostra *onde* o sinal
+A árvore permanece como a leitura interpretável do problema (mostra _onde_ o sinal
 está); o MLP sobre os 20 melhores atributos é quem melhor o explora.
 
 ## 4. Leitura dos resultados
@@ -100,7 +110,7 @@ está); o MLP sobre os 20 melhores atributos é quem melhor o explora.
   **O partido domina a previsão**, com atributos demográficos em papel
   secundário.
 - **Random Forest fica atrás da árvore única** — contraintuitivo, mas
-  coerente: o *ensemble* serve para reduzir variância, e uma árvore rasa e
+  coerente: o _ensemble_ serve para reduzir variância, e uma árvore rasa e
   regularizada já tem variância baixa; o sorteio de atributos da floresta
   ainda dilui o sinal, que está concentrado em poucas colunas de partido.
 - **Sem seleção, MLP e KNN sofrem com as 125 dimensões**; com

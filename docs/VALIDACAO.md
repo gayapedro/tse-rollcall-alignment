@@ -34,20 +34,22 @@ robusta e analisa os erros. O código executável está na **seção 5 do
 
 ## 2. Resultados
 
-| Medida | Valor |
-|---|---|
-| Acurácia (30 medições) | **0,877 ± 0,042** |
-| F1-macro (30 medições) | **0,832 ± 0,059** |
-| Sensibilidade/revocação (governista) | 0,943 |
-| Especificidade (acerto na oposição) | 0,703 |
-| Precisão (governista) | 0,899 |
+| Medida                               | Valor             |
+| ------------------------------------ | ----------------- |
+| Acurácia (30 medições)               | **0,877 ± 0,042** |
+| F1-macro (30 medições)               | **0,832 ± 0,059** |
+| Sensibilidade/revocação (governista) | 0,943             |
+| Especificidade (acerto na oposição)  | 0,703             |
+| Precisão (governista)                | 0,899             |
 
 Matriz de confusão (590 deputados, classe positiva = governista):
 VP = 410, FN = 25, FP = 46, VN = 109.
 
-Referência no mesmo protocolo: a Árvore de Decisão sem seleção (modelo da
-comparação inicial) fica em F1 0,758 ± 0,052 — a seleção de atributos + MLP
-ganha ~0,07 de F1.
+Referência no mesmo protocolo (recomputada na seção 5 do notebook): a Árvore
+de Decisão sem seleção fica em F1 **0,758 ± 0,052** — a seleção de atributos +
+MLP ganha ~0,07 de F1. A diferença é **estatisticamente significativa** num
+teste pareado sobre as 30 medições (mesmas partições): _t_ pareado = 6,80,
+p ≈ 1,8×10⁻⁷ (Wilcoxon: p ≈ 4,7×10⁻⁷).
 
 ## 3. Leitura dos resultados
 

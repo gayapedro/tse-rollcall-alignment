@@ -143,6 +143,10 @@ rótulo depois_.
 > interpretável é 'candidato do PL', e as 20 colunas selecionadas são quase
 > todas de partido, federação e região — mais ocupações como policial militar
 > e produtor agropecuário.
+> E nós não ficamos na suposição: rodamos uma ablação com o mesmo protocolo,
+> removendo a filiação das features. Sem partido e federação, o F1 despenca
+> de 0,83 para 0,52, quase no baseline — ou seja, o sinal **é** a filiação;
+> demografia e geografia sozinhas não sustentam a previsão.
 > A seleção de atributos foi o que destravou o MLP; árvore e floresta já
 > selecionam sozinhas.
 > E sabemos exatamente onde o modelo para de funcionar: nas legendas
@@ -198,6 +202,13 @@ rótulo depois_.
 > mostram que 0,853 estava acima da média da distribuição. O valor que
 > defendemos é o da validação: 0,832 ± 0,059.
 
+**"A diferença entre MLP e árvore é estatisticamente significativa?"** _(Francisco)_
+
+> Sim. As 30 medições da validação cruzada usam as mesmas partições para os
+> dois modelos, então aplicamos teste pareado: t = 6,8 com p ≈ 2×10⁻⁷, e o
+> Wilcoxon confirma. A diferença de 0,073 no F1 não é flutuação de divisão —
+> está na seção 5 do notebook.
+
 **"O recall da oposição caiu em relação à árvore (70% vs 79%). Por quê?"** _(Francisco)_
 
 > A árvore usava class_weight=balanced, que equilibra as classes; o MLP não.
@@ -210,6 +221,16 @@ rótulo depois_.
 > Dez folds: treino com 90% (menos viés pessimista) e ~15 casos de oposição
 > por fold, métrica bem definida. Leave-one-out: 590 ajustes por avaliação,
 > sem estratificação, F1 indefinido em fold de uma amostra.
+
+**"Por que não Naive Bayes, SVM ou Regressão Logística?"** _(Francisco)_
+
+> Naive Bayes assume independência condicional entre features — o one-hot viola
+> isso de forma gritante: as colunas de um mesmo atributo são mutuamente
+> exclusivas, e partido, federação e região são correlacionadíssimas. SVM e
+> Logística aprendem fronteiras sobre o mesmo espaço em que o MLP já atua como
+> contraste não-linear regularizado. A comparação já cobre quatro famílias:
+> distância (KNN), regras (árvore), ensemble (RF) e rede neural (MLP) —
+> adicionar mais modelos multiplicaria a grade sem hipótese nova.
 
 **"Vocês removeram alguma feature manualmente?"** _(Francisco)_
 

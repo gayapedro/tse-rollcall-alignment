@@ -81,6 +81,7 @@ def main():
     agg = {}     # idDep -> [alinhados, total]
     meta = {}    # idDep -> (nome, partido, uf)
     usadas = 0
+    com_gov = 0  # votações com orientação DIRECIONAL do Governo (antes do filtro de contestação)
 
     for i, vid in enumerate(plen):
         ori = get(f"/votacoes/{vid}/orientacoes", cache_key=f"ori_{vid}")
@@ -90,6 +91,7 @@ def main():
         opo = next((o for o in ori if o.get("siglaPartidoBloco") == "Oposição"), None)
         if not gov or gov.get("orientacaoVoto") not in ("Sim", "Não", "Obstrução"):
             continue
+        com_gov += 1
         # só votações CONTESTADAS: Governo e Oposição com orientações divergentes.
         # (votações consensuais inflam o alinhamento e não discriminam linha de atuação)
         if not opo or opo.get("orientacaoVoto") == gov.get("orientacaoVoto"):
@@ -110,7 +112,8 @@ def main():
         if (i + 1) % 100 == 0:
             print(f"  ...{i+1}/{len(plen)} varridas, {usadas} úteis", flush=True)
 
-    print(f"votações úteis (Governo + nominal): {usadas}", flush=True)
+    print(f"votações com orientação direcional do Governo: {com_gov}", flush=True)
+    print(f"votações úteis (contestadas + nominais): {usadas}", flush=True)
     print(f"deputados com voto registrado: {len(agg)}", flush=True)
 
     out = os.path.join(DADOS, "rotulo_deputados.csv")

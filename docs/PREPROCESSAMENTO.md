@@ -75,7 +75,8 @@ percentual. Só nas votações **contestadas** o voto do deputado realmente reve
 lado: votar com o Governo o aproxima de "governista"; votar com a Oposição, de
 "oposição".
 
-Das votações de plenário com orientação direcional do Governo, são **descartadas**:
+Das **453** votações de plenário com orientação direcional do Governo
+(contadas e impressas por `scripts/coleta_rotulo.py`), são **descartadas**:
 
 - as **consensuais** (Governo = Oposição), e
 - as que **não têm orientação da Oposição** (só o Governo orientou).
@@ -135,6 +136,11 @@ ocupacao`.
 Cardinalidade das categóricas: `partido` (23), `uf` (27), `ocupacao` (50),
 `grau_instrucao` (6), `cor_raca` (6), `regiao` (5), `federacao` (4), `genero` (2).
 
+> `grau_instrucao` é ordinal, mas é codificado como nominal (One-Hot): com 6
+> níveis, a codificação binária não explode a dimensionalidade e deixa o modelo
+> livre para aprender relações **não-monotônicas** com o alvo — uma codificação
+> ordinal imporia a suposição de efeito crescente/decrescente.
+
 ## 4. Normalização
 
 - As variáveis **numéricas** (`idade`, `patrimonio_total`) são padronizadas com
@@ -147,6 +153,12 @@ Cardinalidade das categóricas: `partido` (23), `uf` (27), `ocupacao` (50),
   de treino** — evitando vazamento de informação do conjunto de teste para o de
   treino.
 - As variáveis categóricas (após One-Hot) não são escaladas (já são binárias 0/1).
+- **Por que não transformação log no patrimônio?** Apesar da forte assimetria
+  (skewness ≈ 10), optou-se por manter apenas a padronização: modelos de árvore
+  são invariantes a transformações monotônicas, a exploração mostrou que as
+  numéricas quase não carregam sinal sobre o alvo, e `patrimonio_total` nem
+  sobrevive à seleção de atributos do modelo final — a transformação mudaria a
+  escala de uma feature que os modelos não usam.
 
 ---
 
