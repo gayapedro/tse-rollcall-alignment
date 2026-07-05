@@ -38,8 +38,8 @@ estourando, corte fala dos slides 4, 5 e 8 — nunca dos três finais.
 > E um destaque: não usamos nenhum dataset pronto. A base foi construída do
 > zero, cruzando duas fontes públicas cruas."
 
-**Dica:** essa é a frase que a banca precisa guardar: *features antes,
-rótulo depois*.
+**Dica:** essa é a frase que a banca precisa guardar: _features antes,
+rótulo depois_.
 
 ## Slide 4 — Base de dados `(50s · Pedro)`
 
@@ -165,57 +165,76 @@ rótulo depois*.
 
 ## Banco de respostas para as perguntas (5 min)
 
-**"Por que corte 0,5 e não a mediana?"** *(Pedro)*
+**"Por que corte 0,5 e não a mediana?"** _(Pedro)_
+
 > 0,5 tem leitura direta: o deputado alinhou com o Governo na maioria das
 > votações em que os blocos divergiram. Mediana balancearia as classes
 > artificialmente e o rótulo perderia significado político. O desbalanceamento
 > que sobra a gente trata na modelagem, não no rótulo.
 
-**"Por que só votações contestadas?"** *(Pedro)*
+**"Por que só votações contestadas?"** _(Pedro)_
+
 > Votação consensual não discrimina: governista e oposição votam igual. Ela só
 > infla o alinhamento de todo mundo. Sinal está onde os blocos divergem.
 
-**"Como garantem que não há vazamento?"** *(Pedro)*
+**"Como garantem que não há vazamento?"** _(Pedro)_
+
 > Três camadas: X só tem dados do TSE anteriores à eleição; o voto — origem do
 > rótulo — nunca vira feature; e o pré-processamento **e o seletor de
 > atributos** são refitados dentro de cada partição de treino — o teste nunca
 > participa nem do tuning nem da escolha das colunas.
 
-**"Por que a seleção ajuda o MLP e não a árvore ou a floresta?"** *(Francisco)*
+**"Por que a seleção ajuda o MLP e não a árvore ou a floresta?"** _(Francisco)_
+
 > Árvore seleciona implicitamente: cada split escolhe a melhor coluna. O grid
 > confirmou — escolheu 'todas'. O MLP não tem esse mecanismo: 125 entradas
 > para 442 amostras é razão amostras/parâmetros ruim; com 20 entradas a rede
 > compacta generaliza. O KNN melhora pelo mesmo motivo: distância em 20
 > dimensões informativas discrimina melhor que em 125 esparsas.
 
-**"Por que o holdout deu mais que a validação cruzada?"** *(Francisco)*
+**"Por que o holdout deu mais que a validação cruzada?"** _(Francisco)_
+
 > Divisão única é uma amostra de tamanho 1 — pode dar sorte. As 30 medições
 > mostram que 0,853 estava acima da média da distribuição. O valor que
 > defendemos é o da validação: 0,832 ± 0,059.
 
-**"O recall da oposição caiu em relação à árvore (70% vs 79%). Por quê?"** *(Francisco)*
+**"O recall da oposição caiu em relação à árvore (70% vs 79%). Por quê?"** _(Francisco)_
+
 > A árvore usava class_weight=balanced, que equilibra as classes; o MLP não.
 > O F1-macro total sobe de 0,758 para 0,832 — ganho grande — ao custo de um
 > leve deslocamento pró-majoritária. Trade-off consciente, guiado pela métrica
 > de decisão do trabalho. Colocar reweighting no MLP é refinamento futuro.
 
-**"Por que 10 folds? Por que não leave-one-out?"** *(Francisco)*
+**"Por que 10 folds? Por que não leave-one-out?"** _(Francisco)_
+
 > Dez folds: treino com 90% (menos viés pessimista) e ~15 casos de oposição
 > por fold, métrica bem definida. Leave-one-out: 590 ajustes por avaliação,
 > sem estratificação, F1 indefinido em fold de uma amostra.
 
-**"Vocês removeram alguma feature manualmente?"** *(Francisco)*
+**"Vocês removeram alguma feature manualmente?"** _(Francisco)_
+
 > Não. A seleção é aprendida e validada: SelectKBest com k na grade de
 > hiperparâmetros, refitado por fold. O dado decide quantas e quais colunas
 > ficam — no vencedor, 20.
 
-**"O rótulo não fica preso a este mandato?"** *(qualquer um)*
+**"Isso não é só prever pelo partido?"** _(Francisco)_
+
+> Majoritariamente sim — e nós medimos. Rodamos a ablação com o mesmo protocolo
+> (seção 6 do notebook): sem a feature partido, o F1 cai de 0,83 para 0,57; sem
+> partido e federação, para 0,52 — pouco acima do baseline de 0,42, com recall
+> da oposição em 13%. Ou seja, o formulário do TSE prevê a linha de atuação
+> _porque_ contém a filiação; demografia e geografia sozinhas não sustentam a
+> previsão. Saber disso com número é parte do resultado.
+
+**"O rótulo não fica preso a este mandato?"** _(qualquer um)_
+
 > Fica, e está registrado como limitação. Fidelidade partidária resolve —
 > orientação do próprio partido existe em qualquer mandato — e o pipeline é o
 > mesmo, só muda o cálculo do alvo. As features do TSE não dependem do
 > mandato, então todo o trabalho pesado é reaproveitável.
 
-**"E se o candidato trocar de partido depois de eleito?"** *(honesta)*
+**"E se o candidato trocar de partido depois de eleito?"** _(honesta)_
+
 > Usamos o partido da candidatura, que é o que existe antes da eleição — é a
 > premissa do problema. Migração partidária vira ruído no rótulo, e
 > provavelmente é parte dos erros nas legendas divididas.

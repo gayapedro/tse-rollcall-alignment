@@ -24,15 +24,15 @@ do deputado em plenário.
 Conforme exigência do enunciado, **não** se usa base do UCI nem dataset pronto da
 internet. A base é construída do zero a partir de duas fontes públicas cruas:
 
-| Fonte | Tipo | Conteúdo usado |
-|---|---|---|
-| API Dados Abertos da Câmara dos Deputados | REST JSON | deputados, CPF, votações nominais, orientação de bancada |
+| Fonte                                         | Tipo               | Conteúdo usado                                                            |
+| --------------------------------------------- | ------------------ | ------------------------------------------------------------------------- |
+| API Dados Abertos da Câmara dos Deputados     | REST JSON          | deputados, CPF, votações nominais, orientação de bancada                  |
 | Repositório de Dados Eleitorais do TSE (2022) | CSV em massa (ZIP) | perfil do candidato (`consulta_cand`) e bens declarados (`bem_candidato`) |
 
 ## 3. Integração das fontes (linkage)
 
 - **Câmara ↔ TSE:** junção por **CPF** (presente nos dois lados; chave exata, sem
-  *fuzzy match* por nome).
+  _fuzzy match_ por nome).
 - **`consulta_cand` ↔ `bem_candidato`:** o arquivo de bens não possui CPF; a junção
   do patrimônio usa o sequencial **`SQ_CANDIDATO`**.
 - Taxa de casamento: **590/590 deputados** (100%).
@@ -43,19 +43,21 @@ internet. A base é construída do zero a partir de duas fontes públicas cruas:
 ## 4. Pré-processamento
 
 ### 4.1 Filtragem (definição da amostra)
+
 - TSE: apenas `DS_CARGO = DEPUTADO FEDERAL`.
 - Câmara: apenas votações de **plenário (PLEN)** com voto nominal (> 50 votos).
-- Apenas votações **contestadas**: orientação do bloco *Governo* diferente da
-  orientação do bloco *Oposição*. Votações consensuais inflam o alinhamento e não
+- Apenas votações **contestadas**: orientação do bloco _Governo_ diferente da
+  orientação do bloco _Oposição_. Votações consensuais inflam o alinhamento e não
   discriminam a linha de atuação, por isso são descartadas
   (de 453 votações com orientação de Governo, **380 são contestadas**).
 
 ### 4.2 Engenharia do rótulo (variável-alvo)
-1. Para cada votação contestada, lê-se a orientação oficial do bloco *Governo*.
+
+1. Para cada votação contestada, lê-se a orientação oficial do bloco _Governo_.
 2. Para cada deputado, calcula-se `pct_alinhamento_gov` = proporção de votos
    coincidentes com a orientação do Governo.
 3. Binarização com corte **0.5** (interpretável: o deputado alinha com o Governo
-   na *maioria* das votações em que Governo e Oposição divergem):
+   na _maioria_ das votações em que Governo e Oposição divergem):
    - `governista` se `pct_alinhamento_gov >= 0.5`
    - `oposicao` caso contrário.
 
@@ -63,6 +65,7 @@ Distribuição resultante: **435 governista / 155 oposição** (desbalanceado, r
 a composição real da base governista na legislatura).
 
 ### 4.3 Engenharia de features (todas anteriores à eleição)
+
 - `idade` — derivada de `DT_NASCIMENTO` (ano da eleição − ano de nascimento).
 - `regiao` — derivada de `SG_UF` (mapa UF → N/NE/CO/SE/S).
 - `patrimonio_total` — soma de `VR_BEM_CANDIDATO` por candidato (vírgula decimal
@@ -70,16 +73,19 @@ a composição real da base governista na legislatura).
 - `federacao` ausente (`#NULO`) tratada como categoria `"SEM"`.
 
 ### 4.4 Transformações (pipeline scikit-learn)
+
 - Imputação: categóricas → moda; numéricas → mediana.
 - Codificação: `OneHotEncoder(handle_unknown="ignore")` nas 8 variáveis categóricas.
 - Escala: `StandardScaler` nas numéricas (`idade`, `patrimonio_total`).
 - Tudo encapsulado em `Pipeline`, garantindo que o `fit` ocorra **apenas no treino**
-  de cada *fold* (sem vazamento de dados).
+  de cada _fold_ (sem vazamento de dados).
 
-### 4.5 Prevenção de vazamento (*leakage*)
+### 4.5 Prevenção de vazamento (_leakage_)
+
 - O vetor de features X contém **exclusivamente** dados do TSE anteriores à eleição.
 - O comportamento de voto (origem do rótulo) **nunca** é usado como feature.
-- Experimento de robustez: treino **com** e **sem** a feature `partido`.
+- Experimento de robustez: treino **com** e **sem** a feature `partido`
+  (ablação — resultados na §8.4).
 
 ## 5. Conjunto final
 
@@ -92,6 +98,7 @@ pct_alinhamento_gov, n_votacoes, rotulo
 ```
 
 Features usadas no modelo:
+
 - Categóricas (8): `partido, federacao, uf, regiao, genero, grau_instrucao, cor_raca, ocupacao`
 - Numéricas (2): `idade, patrimonio_total`
 
@@ -104,7 +111,7 @@ Features usadas no modelo:
 - **MLP** — `hidden ∈ {(32,),(64,),(32,16)}`, `alpha ∈ {10⁻³,10⁻²}`, `max_iter=2000`.
 
 Todos com **GridSearchCV** (F1-macro, CV interna 5-fold, só no treino) e seleção
-em *holdout* estratificado 75/25.
+em _holdout_ estratificado 75/25.
 
 **Seleção de atributos:** `SelectKBest(f_classif)` dentro do pipeline, com
 `k ∈ {10, 20, 40, todas}` somado à grade — refitado por partição, sem vazamento.
@@ -123,13 +130,13 @@ em *holdout* estratificado 75/25.
 
 ### 8.1 Efeito da seleção de atributos (F1-macro, holdout 25%)
 
-| Modelo | F1 sem seleção | F1 com seleção | k escolhido |
-|---|---|---|---|
-| **MLP** | 0.774 | **0.853** | **20** |
-| Árvore de Decisão | 0.805 | 0.805 | todas |
-| KNN | 0.738 | 0.771 | 40 |
-| Random Forest | 0.757 | 0.757 | todas |
-| Baseline (majoritária) | 0.424 | — | — |
+| Modelo                 | F1 sem seleção | F1 com seleção | k escolhido |
+| ---------------------- | -------------- | -------------- | ----------- |
+| **MLP**                | 0.774          | **0.853**      | **20**      |
+| Árvore de Decisão      | 0.805          | 0.805          | todas       |
+| KNN                    | 0.738          | 0.771          | 40          |
+| Random Forest          | 0.757          | 0.757          | todas       |
+| Baseline (majoritária) | 0.424          | —              | —           |
 
 **Modelo escolhido: MLP (`hidden=(32,)`, `alpha=0.01`) + `SelectKBest(k=20)`.**
 A seleção destrava os modelos sensíveis à dimensionalidade (MLP, KNN); árvore e
@@ -137,8 +144,8 @@ floresta escolhem `k=todas` porque árvores já selecionam implicitamente por sp
 
 ### 8.2 Validação robusta (10-fold ×3)
 
-| Medida | Valor |
-|---|---|
+| Medida                 | Valor             |
+| ---------------------- | ----------------- |
 | Acurácia (30 medições) | **0.877 ± 0.042** |
 | F1-macro (30 medições) | **0.832 ± 0.059** |
 
@@ -161,13 +168,36 @@ Colunas de **partido** (PL, PT, MDB, NOVO, PDT, PSD, REPUBLICANOS...) e
 militar reformado, produtor agropecuário). Na leitura interpretável (árvore de
 decisão, profundidade 3), a raiz é `partido_PL`.
 
+### 8.4 Robustez — prever sem o partido (ablação)
+
+Repetindo o protocolo completo (GridSearchCV + SelectKBest na grade, holdout
+75/25, validação cruzada 10-fold ×3) sem a informação de filiação partidária
+(seção 6 do notebook):
+
+| Configuração                | Melhor modelo | F1 CV (10×3)      | Recall oposição |
+| --------------------------- | ------------- | ----------------- | --------------- |
+| Completo                    | MLP (k=20)    | **0.832 ± 0.059** | 0.703           |
+| Sem `partido`               | MLP (k=40)    | 0.567 ± 0.057     | 0.297           |
+| Sem `partido` e `federacao` | KNN (todas)   | 0.518 ± 0.072     | 0.129           |
+| Baseline (majoritária)      | —             | 0.424             | 0.000           |
+
+- Sem `partido`, a `federacao` age como _proxy_ parcial — mas só identifica o
+  campo à esquerda (`PT/PC do B/PV`, `PSOL/REDE`); o PL, sem federação, torna-se
+  invisível e concentra os erros (73 de 176).
+- Sem filiação alguma, o modelo quase colapsa na classe majoritária (recall da
+  oposição 0.129); o ganho residual sobre o baseline vem de traços demográficos
+  fracos (ocupações de segurança pública/agro, região Sul).
+- **Leitura:** o perfil TSE prevê a linha de atuação _porque_ contém a filiação
+  partidária; demografia + geografia sozinhas não sustentam a previsão.
+
 ## 9. Discussão e conclusão
 
 **A linha de atuação é previsível a partir do perfil do candidato — e o
 partido/federação é o preditor dominante.** O F1 real (validação cruzada
 repetida) é **0.832 ± 0.059**, contra 0.424 do baseline. Vinte colunas bastam, e
 quase todas são de filiação partidária; demografia (região, ocupação, idade)
-tem papel secundário.
+tem papel secundário — a ablação da §8.4 quantifica: sem partido/federação, o
+F1 cai para 0.518.
 
 Dois achados metodológicos valorizam o trabalho: (1) o holdout único (0.853) era
 otimista em relação à validação repetida — evidência direta de por que validação
@@ -183,8 +213,8 @@ não determina a posição, o perfil pré-eleição não é suficiente.
 - **Rótulo relativo ao mandato:** "governista" depende de quem governa. Uma
   alternativa que generaliza entre legislaturas é a **fidelidade partidária**
   (alinhamento com a orientação do próprio partido), que independe de qual
-  partido está no poder. Mesmo *pipeline*, apenas troca o cálculo do alvo.
-- **Etapa não-supervisionada (descartada por tempo):** um *clustering* do padrão
+  partido está no poder. Mesmo _pipeline_, apenas troca o cálculo do alvo.
+- **Etapa não-supervisionada (descartada por tempo):** um _clustering_ do padrão
   de votação poderia revelar linhas de atuação inesperadas, além do eixo
   Governo×Oposição.
 - Inclusão do **Senado** (81 senadores) como extensão.
