@@ -79,8 +79,8 @@ vencedor **MLP (32,) + SelectKBest(20)**, F1 real 0.832 ± 0.059.
 - Sim, é previsível: F1 real 0.83 vs baseline 0.42.
 - O partido domina — raiz da árvore é `partido_PL`; 20 colunas bastam (partidos,
   federações, região/UF, ocupações de segurança e agro).
-- **Ablação (robustez):** sem partido/federação, F1 cai de 0.83 para 0.52 — o
-  sinal é a filiação (seção 6 do notebook).
+- **Ablação (robustez):** só o partido mantém F1 0.83; sem partido/federação
+  cai a 0.52 — o sinal é a filiação (seção 6 do notebook).
 - Seleção de atributos destrava o MLP (0.77 → 0.85); árvore e RF já selecionam sozinhas.
 - Limite estrutural: legenda dividida → perfil TSE não separa.
 

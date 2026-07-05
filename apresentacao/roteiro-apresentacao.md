@@ -143,10 +143,11 @@ rótulo depois_.
 > interpretável é 'candidato do PL', e as 20 colunas selecionadas são quase
 > todas de partido, federação e região — mais ocupações como policial militar
 > e produtor agropecuário.
-> E nós não ficamos na suposição: rodamos uma ablação com o mesmo protocolo,
-> removendo a filiação das features. Sem partido e federação, o F1 despenca
-> de 0,83 para 0,52, quase no baseline — ou seja, o sinal **é** a filiação;
-> demografia e geografia sozinhas não sustentam a previsão.
+> E nós não ficamos na suposição: rodamos uma ablação nos dois sentidos, com
+> o mesmo protocolo. Sem partido e federação, o F1 despenca de 0,83 para
+> 0,52, quase no baseline; e um modelo treinado **só** com o partido mantém
+> os 0,83. Ou seja, o sinal **é** a filiação — demografia e geografia
+> sozinhas não sustentam a previsão, nem acrescentam nada a ela.
 > A seleção de atributos foi o que destravou o MLP; árvore e floresta já
 > selecionam sozinhas.
 > E sabemos exatamente onde o modelo para de funcionar: nas legendas
