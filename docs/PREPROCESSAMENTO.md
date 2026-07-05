@@ -164,6 +164,6 @@ TSE (CSV)      ─┘
        └─ StandardScaler nas 2 numéricas (dentro do pipeline, sem leakage)
 ```
 
-Scripts correspondentes: `coleta_rotulo.py` (rótulo/Câmara),
-`montar_dataset.py` (junção + atributos derivados) e `notebook.ipynb`
+Scripts correspondentes: `scripts/coleta_rotulo.py` (rótulo/Câmara),
+`scripts/montar_dataset.py` (junção + atributos derivados) e `notebook.ipynb`
 (One-Hot, imputação e normalização no pipeline — seções 1–3).

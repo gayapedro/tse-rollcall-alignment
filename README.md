@@ -54,9 +54,9 @@ python3 -m venv .venv
 .venv/bin/pip install scikit-learn pandas numpy
 
 # etapa inicial (baixa da internet e reconstrói os caches automaticamente):
-.venv/bin/python coleta_rotulo.py     # -> rotulo_deputados.csv
-.venv/bin/python montar_dataset.py    # -> dataset_final.csv
-.venv/bin/python exportar_csvs.py     # -> tse.csv, camara.csv, dataset.csv
+.venv/bin/python scripts/coleta_rotulo.py     # -> dados/rotulo_deputados.csv
+.venv/bin/python scripts/montar_dataset.py    # -> dados/dataset_final.csv
+.venv/bin/python scripts/exportar_csvs.py     # -> dados/{tse,camara,dataset}.csv
 ```
 
 Os scripts cacheiam os dados brutos em `cache_camara/` e `cache_tse/`
@@ -69,30 +69,37 @@ do cache.
 ## Estrutura do repositório
 
 ```
-coleta_rotulo.py       # 1. coleta Câmara + cálculo do rótulo
-montar_dataset.py      # 2. coleta TSE + junção por CPF
-exportar_csvs.py       # 3. exporta tse.csv / camara.csv / dataset.csv
-tse.csv                # dado original do TSE
-camara.csv             # dado coletado da API da Câmara
-dataset.csv            # base final integrada (entrada do pré-processamento)
-notebook.ipynb         # pré-processamento + modelagem (+ seleção de atributos) + validação
-PREPROCESSAMENTO.md    # documentação da etapa de pré-processamento
-MODELAGEM.md           # documentação da etapa de modelagem
-VALIDACAO.md           # documentação da etapa de validação
-RELATORIO.md           # relatório consolidado do trabalho
-plano-slides.md        # plano dos slides da apresentação
-roteiro-apresentacao.md# roteiro de fala da apresentação (10 min + perguntas)
-apresentacao.pptx      # slides da apresentação
+notebook.ipynb                        # pré-processamento + modelagem (+ seleção de atributos)
+                                      #   + validação + ablação sem partido (executável)
+scripts/
+  coleta_rotulo.py                    # 1. coleta Câmara + cálculo do rótulo
+  montar_dataset.py                   # 2. coleta TSE + junção por CPF
+  exportar_csvs.py                    # 3. exporta os CSVs de linhagem
+dados/
+  tse.csv                             # dado original do TSE
+  camara.csv                          # dado coletado da API da Câmara
+  dataset.csv                         # base final integrada (entrada do pré-processamento)
+docs/
+  PREPROCESSAMENTO.md                 # documentação da etapa de pré-processamento
+  MODELAGEM.md                        # documentação da etapa de modelagem
+  VALIDACAO.md                        # documentação da etapa de validação
+  RELATORIO.md                        # relatório consolidado do trabalho
+apresentacao/
+  apresentacao.pptx                   # slides da apresentação
+  plano-slides.md                     # plano dos slides
+  roteiro-apresentacao.md             # roteiro de fala (10 min + perguntas)
 ```
 
 ## Etapas seguintes
 
-A partir de `dataset.csv`, o fluxo segue no `notebook.ipynb`:
+A partir de `dados/dataset.csv`, o fluxo segue no `notebook.ipynb`:
 
-- **[Pré-processamento](PREPROCESSAMENTO.md)** — limpeza, exploração, transformação e
+- **[Pré-processamento](docs/PREPROCESSAMENTO.md)** — limpeza, exploração, transformação e
   normalização dos dados (seções 1–3 do notebook).
-- **[Modelagem](MODELAGEM.md)** — múltiplos algoritmos de classificação comparados por
+- **[Modelagem](docs/MODELAGEM.md)** — múltiplos algoritmos de classificação comparados por
   acurácia/F1, com seleção de atributos (`SelectKBest`) na grade de
   hiperparâmetros, para escolher o melhor (seção 4 do notebook).
-- **[Validação](VALIDACAO.md)** — validação cruzada estratificada repetida, matriz de
+- **[Validação](docs/VALIDACAO.md)** — validação cruzada estratificada repetida, matriz de
   confusão e análise de erros do modelo escolhido (seção 5 do notebook).
+- **Ablação** — experimento de robustez sem a feature `partido` (seção 6 do
+  notebook; resultados em [docs/RELATORIO.md](docs/RELATORIO.md), §8.4).

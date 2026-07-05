@@ -19,9 +19,10 @@ Features TSE (todas anteriores ao mandato -> sem leakage):
 import urllib.request, json, os, csv, io, zipfile, statistics, sys, time
 
 B = "https://dadosabertos.camara.leg.br/api/v2"
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # raiz do repo
 CACHE = os.path.join(ROOT, "cache_camara"); os.makedirs(CACHE, exist_ok=True)
 TSE = os.path.join(ROOT, "cache_tse"); os.makedirs(TSE, exist_ok=True)
+DADOS = os.path.join(ROOT, "dados"); os.makedirs(DADOS, exist_ok=True)
 
 TSE_URLS = {
     "consulta_cand": "https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_2022.zip",
@@ -114,7 +115,7 @@ def carregar_patrimonio():
 
 
 def main():
-    rot_fp = os.path.join(ROOT, "rotulo_deputados.csv")
+    rot_fp = os.path.join(DADOS, "rotulo_deputados.csv")
     if not os.path.exists(rot_fp):
         sys.exit("rotulo_deputados.csv ainda não existe — rode coleta_rotulo.py antes.")
 
@@ -141,7 +142,7 @@ def main():
     cols = ["idDeputado","nome","cpf","partido","federacao","uf","regiao","idade",
             "genero","grau_instrucao","cor_raca","ocupacao","patrimonio_total",
             "pct_alinhamento_gov","n_votacoes","rotulo"]
-    out = os.path.join(ROOT, "dataset_final.csv")
+    out = os.path.join(DADOS, "dataset_final.csv")
     casados = 0
     with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols); w.writeheader()

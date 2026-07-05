@@ -222,9 +222,10 @@ não determina a posição, o perfil pré-eleição não é suficiente.
 ## 11. Reprodutibilidade
 
 ```
-coleta_rotulo.py    # Câmara: votações contestadas -> rotulo_deputados.csv
-montar_dataset.py   # CPF + TSE (consulta_cand + bens) -> dataset_final.csv
-notebook.ipynb      # limpeza, exploração, transformação, modelagem (+ seleção), validação
+scripts/coleta_rotulo.py    # Câmara: votações contestadas -> dados/rotulo_deputados.csv
+scripts/montar_dataset.py   # CPF + TSE (consulta_cand + bens) -> dados/dataset_final.csv
+notebook.ipynb              # limpeza, exploração, transformação, modelagem (+ seleção),
+                            #   validação e ablação sem partido
 ```
 
 Dados crus ficam em `cache_camara/` e `cache_tse/` (cacheados em disco; re-execução

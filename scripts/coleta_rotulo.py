@@ -16,8 +16,11 @@ Saída: rotulo_deputados.csv  (idDeputado, nome, partido, uf, n_votacoes,
 import urllib.request, json, calendar, os, csv, time, sys
 
 B = "https://dadosabertos.camara.leg.br/api/v2"
-CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cache_camara")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # raiz do repo
+CACHE = os.path.join(ROOT, "cache_camara")
+DADOS = os.path.join(ROOT, "dados")
 os.makedirs(CACHE, exist_ok=True)
+os.makedirs(DADOS, exist_ok=True)
 
 ANOS = [2023, 2024]          # janela do mandato (expandir se precisar de sinal)
 MIN_VOTOS = 50               # votação precisa ser nominal de verdade
@@ -110,7 +113,7 @@ def main():
     print(f"votações úteis (Governo + nominal): {usadas}", flush=True)
     print(f"deputados com voto registrado: {len(agg)}", flush=True)
 
-    out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rotulo_deputados.csv")
+    out = os.path.join(DADOS, "rotulo_deputados.csv")
     with open(out, "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["idDeputado", "nome", "partido", "uf",

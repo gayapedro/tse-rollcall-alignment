@@ -10,9 +10,10 @@ Lê do cache local (cache_tse/, cache_camara/, rotulo_deputados.csv). Sem rede.
 """
 import os, csv, io, zipfile, json, statistics
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # raiz do repo
 CACHE = os.path.join(ROOT, "cache_camara")
 TSE = os.path.join(ROOT, "cache_tse")
+DADOS = os.path.join(ROOT, "dados")
 
 REGIAO = {
     "AC":"N","AP":"N","AM":"N","PA":"N","RO":"N","RR":"N","TO":"N",
@@ -49,7 +50,7 @@ def gerar_tse():
     cols = ["cpf","sq_candidato","nome","partido","federacao","uf","regiao",
             "idade","genero","grau_instrucao","cor_raca","ocupacao",
             "patrimonio_total","situacao_eleicao"]
-    out = os.path.join(ROOT, "tse.csv")
+    out = os.path.join(DADOS, "tse.csv")
     porcpf = {}
     with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols); w.writeheader()
@@ -80,9 +81,9 @@ def gerar_tse():
 
 def gerar_camara():
     """Deputados eleitos + atuação medida na API da Câmara (com CPF)."""
-    rot = list(csv.DictReader(open(os.path.join(ROOT, "rotulo_deputados.csv"))))
+    rot = list(csv.DictReader(open(os.path.join(DADOS, "rotulo_deputados.csv"))))
     cols = ["idDeputado","nome","cpf","partido","uf","n_votacoes","pct_alinhamento_gov"]
-    out = os.path.join(ROOT, "camara.csv")
+    out = os.path.join(DADOS, "camara.csv")
     with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols); w.writeheader()
         for d in rot:
@@ -102,7 +103,7 @@ def gerar_dataset(tse_por_cpf, rot):
     cols = ["idDeputado","nome","cpf","partido","federacao","uf","regiao","idade",
             "genero","grau_instrucao","cor_raca","ocupacao","patrimonio_total",
             "pct_alinhamento_gov","n_votacoes","rotulo"]
-    out = os.path.join(ROOT, "dataset.csv")
+    out = os.path.join(DADOS, "dataset.csv")
     n = 0
     with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols); w.writeheader()
