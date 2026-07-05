@@ -12,6 +12,7 @@ cache_tse/
 contested_ids.json
 
 # Ferramentas e editor
+.DS_Store
 .claude/
 .code-review-graph/
 .ipynb_checkpoints/

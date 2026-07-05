@@ -177,6 +177,7 @@ Repetindo o protocolo completo (GridSearchCV + SelectKBest na grade, holdout
 | Configuração                | Melhor modelo | F1 CV (10×3)      | Recall oposição |
 | --------------------------- | ------------- | ----------------- | --------------- |
 | Completo                    | MLP (k=20)    | **0.832 ± 0.059** | 0.703           |
+| Só `partido`                | MLP           | **0.829 ± 0.061** | —               |
 | Sem `partido`               | MLP (k=40)    | 0.567 ± 0.057     | 0.297           |
 | Sem `partido` e `federacao` | KNN (todas)   | 0.518 ± 0.072     | 0.129           |
 | Baseline (majoritária)      | —             | 0.424             | 0.000           |
@@ -187,6 +188,10 @@ Repetindo o protocolo completo (GridSearchCV + SelectKBest na grade, holdout
 - Sem filiação alguma, o modelo quase colapsa na classe majoritária (recall da
   oposição 0.129); o ganho residual sobre o baseline vem de traços demográficos
   fracos (ocupações de segurança pública/agro, região Sul).
+- **Só o partido mantém o desempenho do modelo completo** (0.829 × 0.832 —
+  diferença de 0.003, muito abaixo do ruído de ±0.06): as demais colunas
+  selecionadas (UF, região, ocupações) são _proxies univariados_ do partido,
+  com F-score alto isoladamente mas sem informação condicional nova.
 - **Leitura:** o perfil TSE prevê a linha de atuação _porque_ contém a filiação
   partidária; demografia + geografia sozinhas não sustentam a previsão.
 

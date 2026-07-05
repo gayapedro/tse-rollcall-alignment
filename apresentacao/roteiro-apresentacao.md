@@ -96,7 +96,7 @@ rótulo depois_.
 
 ## Slide 8 — Validação `(50s · Francisco)`
 
-> "Um holdout único pode dar sorte. Então a validação usa validação cruzada
+> "Usamos validação cruzada
 > estratificada de 10 folds, repetida três vezes — 30 medições, média e
 > desvio. Dez folds porque o treino fica com 90% da base e cada fold de teste
 > ainda tem uns 15 casos de oposição.
@@ -240,12 +240,14 @@ rótulo depois_.
 
 **"Isso não é só prever pelo partido?"** _(Francisco)_
 
-> Majoritariamente sim — e nós medimos. Rodamos a ablação com o mesmo protocolo
-> (seção 6 do notebook): sem a feature partido, o F1 cai de 0,83 para 0,57; sem
-> partido e federação, para 0,52 — pouco acima do baseline de 0,42, com recall
-> da oposição em 13%. Ou seja, o formulário do TSE prevê a linha de atuação
-> _porque_ contém a filiação; demografia e geografia sozinhas não sustentam a
-> previsão. Saber disso com número é parte do resultado.
+> Essencialmente sim — e nós medimos nos dois sentidos. Rodamos a ablação com o
+> mesmo protocolo (seção 6 do notebook): sem a feature partido, o F1 cai de
+> 0,83 para 0,57; sem partido e federação, para 0,52 — pouco acima do baseline
+> de 0,42. E o inverso: um modelo treinado **só** com o partido dá 0,829 —
+> estatisticamente igual ao completo (0,832). As demais colunas que a seleção
+> mantém são proxies do partido. O formulário do TSE prevê a linha de atuação
+> _porque_ contém a filiação — e demonstrar isso com número é parte do
+> resultado.
 
 **"O rótulo não fica preso a este mandato?"** _(qualquer um)_
 
